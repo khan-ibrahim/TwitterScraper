@@ -128,3 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 twitterScraper_config.txt
+twitterScraper_usernames.txt
