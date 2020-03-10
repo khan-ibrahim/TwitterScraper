@@ -13,7 +13,7 @@ numRequestsMade = 0
 # # TODO: make private?
 consumer_api_key = None
 consumer_secret_api_key = None
-access_token = None
+bearer_token = None
 
 #in a 24-hour period, a single app can make up to 100,000 requests
 checksPerDay = 10   #number of times in 24hrs that all data is refreshed
@@ -84,36 +84,37 @@ def generateBearerCredentials(consumer_api_key, consumer_secret_api_key):
     return base64.b64encode(bytearray(bearerCredentials, 'utf-8'))
 
 def getBearerToken():
+    if not bearer_token == None:
+        return bearer_token
+
     bearerCredentials = \
     generateBearerCredentials(consumer_api_key, consumer_secret_api_key)
 
     # HTTP POST request to ouath2/token
-    url = 'api.twitter.com/oauth2/token'
+    url = 'https://api.twitter.com/oauth2/token'
     headers = {}
-    headers['Authorization': 'Basic ' + bearerCredentials]
+    auth = b'Basic ' + bearerCredentials
+    headers['Authorization'] = auth
     headers['Content-Type'] = r'application/x-www-form-urlencoded;charset=UTF-8'
     body = 'grant_type=client_credentials'
 
     r = requests.post(url, headers=headers, data=body)
-
-    print(r)
 
     if not r.status_code == requests.codes.ok:
         print('ERROR requesting bearerToken')
         r.raise_for_status()
         exit(1)
 
-    print(r.headers)
+    payload = r.json
 
-    if not r.headers['token_type'] == 'bearer':
+    if not payload()['token_type'] == 'bearer':
         print('ERROR: Getting bearertoken: token_type invalid')
-        print(r.headers)
-
+        print(payload())
         exit(1)
 
-    access_token = r.headers['access_token']
+    bearer_token = payload()['access_token']
 
-    return access_token
+    return bearer_token
 
 #adds new users to users list from user file.
 def loadUsers(usersFilePath):
@@ -174,7 +175,7 @@ def initialize():
     print('loading configuration')
     loadConfig(configFilePath)
     print('loading users list')
-    loadUsers()
+    loadUsers(usersFilePath)
     print('Users list loaded {}'.format(users))
     print('Obtaining authentication')
     getBearerToken()
