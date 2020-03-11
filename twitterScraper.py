@@ -107,14 +107,14 @@ def getBearerToken():
         r.raise_for_status()
         exit(1)
 
-    payload = r.json
+    payload = r.json()
 
-    if not payload()['token_type'] == 'bearer':
+    if not payload['token_type'] == 'bearer':
         print('ERROR: Getting bearertoken: token_type invalid')
-        print(payload())
+        print(payload)
         exit(1)
 
-    bearer_token = payload()['access_token']
+    bearer_token = payload['access_token']
 
     return bearer_token
 
