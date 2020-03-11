@@ -136,17 +136,25 @@ def getMoreTweets(screen_name, since_id):
     # TODO: getTweets of screen_name made since tweet since_id
     # GET request to https://api.twitter.com/1.1/statuses/user_timeline.json
 
+    url = '''https://api.twitter.com/1.1/statuses/user_timeline.json'''
+
+    headers = {}
+    headers['Authorization'] = 'Bearer ' + bearer_token
+
+    params = {}
+    params['screen_name'] = screen_name[1:]
+
     if since_id == None:
         # request as many as possible (omit count/since_id)
         print('Getting most tweets from %s'.format(screen_name))
 
-        return
     else:
         # request tweets since since_id
         print('Getting tweets since %s'.format(since_id))
-        return
+        data['since_id'] = since_id
 
-    return
+    r = requests.get(url, headers=headers, params=params)
+    return r.json()
 
 def updateTweetsData(screen_name, tweetsJson):
     return
