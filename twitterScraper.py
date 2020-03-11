@@ -84,6 +84,8 @@ def generateBearerCredentials(consumer_api_key, consumer_secret_api_key):
     return base64.b64encode(bytearray(bearerCredentials, 'utf-8'))
 
 def getBearerToken():
+    global bearer_token
+    
     if not bearer_token == None:
         return bearer_token
 
