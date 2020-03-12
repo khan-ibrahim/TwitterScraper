@@ -142,16 +142,19 @@ def getMoreTweets(screen_name, since_id):
     headers['Authorization'] = 'Bearer ' + bearer_token
 
     params = {}
+    params['tweet_mode'] = 'extended'
     params['screen_name'] = screen_name[1:]
 
     if since_id == None:
+        numRecentTweets = 50
         # request as many as possible (omit count/since_id)
-        print('Getting most tweets from %s'.format(screen_name))
+        params['count'] = numRecentTweets
+        print('Getting {} most recent tweets from {}'.format(numRecentTweets, screen_name))
 
     else:
         # request tweets since since_id
-        print('Getting tweets since %s'.format(since_id))
-        data['since_id'] = since_id
+        print('Getting tweets from {} since tweet id {}'.format(screen_name, since_id))
+        params['since_id'] = since_id
 
     r = requests.get(url, headers=headers, params=params)
     return r.json()
@@ -182,9 +185,9 @@ def updateAll():
     return;
 
 def initialize():
-    print('loading configuration')
+    print('Loading configuration')
     loadConfig(configFilePath)
-    print('loading users list')
+    print('Loading users list')
     loadUsers(usersFilePath)
     print('Users list loaded {}'.format(users))
     print('Obtaining authentication')
