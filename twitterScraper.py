@@ -129,9 +129,23 @@ def loadUsers(usersFilePath):
     print(users)
     return
 
-def getLastLoggedTweetId(screenName):
-    # TODO: get the id of the user's most recently downloaded tweet
-    return
+# get the id of the user's most recently logged tweet from dataFile, if exists
+def getLastLoggedTweetId(screen_name):
+    lastLine = None
+
+    if dataFileExists(screen_name):
+        dataFilePath = getDataFilePath(screen_name)
+
+        #seeks to end of file, then seeks backwards for newline
+        with open(dataFilePath, "rb") as dataFile:
+            dataFile.seek(-2, os.SEEK_END)
+            while dataFile.read(1) != b'\n':
+                dataFile.seek(-2, os.SEEK_CUR)
+            lastLine = dataFile.readline().decode()
+        return json.loads(lastLine)['id']
+
+    else:
+        return None
 
 def getMoreTweets(screen_name, since_id):
     # TODO: getTweets of screen_name made since tweet since_id
