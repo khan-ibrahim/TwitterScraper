@@ -158,6 +158,10 @@ def getMoreTweets(screen_name, since_id):
 
     r = requests.get(url, headers=headers, params=params)
     return r.json()
+def initializeTweetsData(screen_name):
+    with open(dataFilePrefix + screen_name[1:], 'x') as f: pass
+    # TODO:
+    return
 
 def updateTweetsData(screen_name, tweetsJson):
     return
@@ -170,8 +174,7 @@ def dataFileExists(screen_name):
 def updateUser(screen_name):
     print('updating user %s'.format(screen_name))
     if not dataFileExists(screen_name):
-        #create data file for user
-        pass
+        initializeTweetsData(screen_name)
     lastLoggedId = getLastLoggedTweetId(screen_name)
     responseJson = getMoreTweets(screen_name, lastLoggedId)
     updateTweetsData(screen_name, responseJson)
