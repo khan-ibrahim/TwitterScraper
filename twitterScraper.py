@@ -3,6 +3,7 @@ import configparser
 import requests
 import os
 import base64
+import json
 
 usersFilePath = 'twitterScraper_usernames.txt'
 configFilePath = 'twitterScraper_config.txt'
@@ -85,7 +86,7 @@ def generateBearerCredentials(consumer_api_key, consumer_secret_api_key):
 
 def getBearerToken():
     global bearer_token
-    
+
     if not bearer_token == None:
         return bearer_token
 
@@ -157,14 +158,38 @@ def getMoreTweets(screen_name, since_id):
         params['since_id'] = since_id
 
     r = requests.get(url, headers=headers, params=params)
+    r.raise_for_status()
+
+    # TODO: track response ratelimit data
+
     return r.json()
+
 def initializeTweetsData(screen_name):
-    with open(dataFilePrefix + screen_name[1:], 'x') as f: pass
+    with open(dataFilePathPrefix + screen_name[1:], 'x') as f: pass
     # TODO:
     return
 
+# stores one tweet dict per line, from oldest to newest
 def updateTweetsData(screen_name, tweetsJson):
+    filePath = dataFilePathPrefix + screen_name[1:]
+    dataFile = open(filePath, 'a')
+    while len(tweetsJson) > 0:
+        tweet = tweetsJson.pop()
+        tweetJsonStr = json.dumps(tweet)
+        dataFile.write(tweetJsonStr)
+        dataFile.write('\n')
     return
+
+def loadTweetsData(screen_name):
+    filePath = dataFilePathPrefix + screen_name[1:]
+    tweetsJson = []
+
+    dataFile = open(filePath, 'r')
+    for line in dataFile:
+        tweet = json.loads(line)
+        tweetsJson.append(tweet)
+
+    return tweetsJson
 
 def dataFileExists(screen_name):
     #default @sceen_name -> dataFile_screen_name
