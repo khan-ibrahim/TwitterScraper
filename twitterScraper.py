@@ -225,7 +225,7 @@ def updateUser(screen_name):
 def updateAll():
     print('updating all!')
     for user in users:
-        updateuser(screen_name)
+        updateUser(screen_name)
         time.sleep(delayBetweenUser) #wait 3 minutes
     return;
 
