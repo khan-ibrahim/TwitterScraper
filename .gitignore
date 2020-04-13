@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 twitterScraper_config.txt
 twitterScraper_usernames.txt
+dataFile*.txt
