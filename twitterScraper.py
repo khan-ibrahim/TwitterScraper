@@ -67,8 +67,8 @@ def loadConfig(configFilePath):
 
     global checksPerDay
     global delayBetweenUser
-    checksPerDay = config['SETTINGS']['checksPerDay']
-    delayBetweenUser = config['SETTINGS']['delayBetweenUser']
+    checksPerDay = int(config['SETTINGS']['checksPerDay'])
+    delayBetweenUser = int(config['SETTINGS']['delayBetweenUser'])
 
     global dataFilePathPrefix
     dataFilePathPrefix = config['SETTINGS']['dataFilePathPrefix']
