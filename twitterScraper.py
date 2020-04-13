@@ -164,37 +164,40 @@ def getMoreTweets(screen_name, since_id):
 
     return r.json()
 
+def getDataFilePath(screen_name):
+    return dataFilePathPrefix + screen_name[1:]
+
 def initializeTweetsData(screen_name):
-    with open(dataFilePathPrefix + screen_name[1:], 'x') as f: pass
+    dataFilePath = getDataFilePath(screen_name)
+    with open(dataFilePath, 'x') as f: pass
     # TODO:
     return
 
 # stores one tweet dict per line, from oldest to newest
 def updateTweetsData(screen_name, tweetsJson):
-    filePath = dataFilePathPrefix + screen_name[1:]
-    dataFile = open(filePath, 'a')
-    while len(tweetsJson) > 0:
-        tweet = tweetsJson.pop()
-        tweetJsonStr = json.dumps(tweet)
-        dataFile.write(tweetJsonStr)
-        dataFile.write('\n')
+    dataFilePath = getDataFilePath(screen_name)
+    with open(dataFilePath, 'a') as dataFile:
+        while len(tweetsJson) > 0:
+            tweet = tweetsJson.pop()
+            tweetJsonStr = json.dumps(tweet)
+            dataFile.write(tweetJsonStr)
+            dataFile.write('\n')
     return
 
 def loadTweetsData(screen_name):
-    filePath = dataFilePathPrefix + screen_name[1:]
     tweetsJson = []
 
-    dataFile = open(filePath, 'r')
-    for line in dataFile:
-        tweet = json.loads(line)
-        tweetsJson.append(tweet)
-
+    dataFilePath = getDataFilePath(screen_name)
+    with open(dataFilePath, 'r') as dataFile:
+        for line in dataFile:
+            tweet = json.loads(line)
+            tweetsJson.append(tweet)
     return tweetsJson
 
 def dataFileExists(screen_name):
     #default @sceen_name -> dataFile_screen_name
-    filePath = dataFilePathPrefix + screen_name[1:]
-    return os.path.exists(filePath)
+    dataFilePath = getDataFilePath(screen_name)
+    return os.path.exists(dataFilePath)
 
 def updateUser(screen_name):
     print('updating user %s'.format(screen_name))
