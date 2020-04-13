@@ -129,24 +129,6 @@ def loadUsers(usersFilePath):
     print(users)
     return
 
-# get the id of the user's most recently logged tweet from dataFile, if exists
-def getLastLoggedTweetId(screen_name):
-    lastLine = None
-
-    if dataFileExists(screen_name):
-        dataFilePath = getDataFilePath(screen_name)
-
-        #seeks to end of file, then seeks backwards for newline
-        with open(dataFilePath, "rb") as dataFile:
-            dataFile.seek(-2, os.SEEK_END)
-            while dataFile.read(1) != b'\n':
-                dataFile.seek(-2, os.SEEK_CUR)
-            lastLine = dataFile.readline().decode()
-        return json.loads(lastLine)['id']
-
-    else:
-        return None
-
 def getMoreTweets(screen_name, since_id):
     # TODO: getTweets of screen_name made since tweet since_id
     # GET request to https://api.twitter.com/1.1/statuses/user_timeline.json
@@ -174,12 +156,15 @@ def getMoreTweets(screen_name, since_id):
     r = requests.get(url, headers=headers, params=params)
     r.raise_for_status()
 
-    # TODO: track response ratelimit data
+    # TODO: track response header ratelimit information
 
-    return r.json()
+    tweetsJson = r.json()
+    print('Retrieved {} tweets from Twitter API'.format(len(tweetsJson)))
+
+    return tweetsJson
 
 def getDataFilePath(screen_name):
-    return dataFilePathPrefix + screen_name[1:]
+    return dataFilePathPrefix + screen_name[1:] + '.txt'
 
 def initializeTweetsData(screen_name):
     dataFilePath = getDataFilePath(screen_name)
@@ -187,8 +172,34 @@ def initializeTweetsData(screen_name):
     # TODO:
     return
 
+# get the id of the user's most recently logged tweet from dataFile, if exists
+def getLastLoggedTweetId(screen_name):
+    lastLine = None
+
+    if dataFileExists(screen_name):
+        dataFilePath = getDataFilePath(screen_name)
+
+        #seeks to end of file, then seeks backwards for newline
+        with open(dataFilePath, "rb") as dataFile:
+            dataFile.seek(-2, os.SEEK_END)
+            while dataFile.read(1) != b'\n':
+                dataFile.seek(-2, os.SEEK_CUR)
+            lastLine = dataFile.readline().decode()
+        return json.loads(lastLine)['id']
+
+    else:
+        return None
+
 # stores one tweet dict per line, from oldest to newest
 def updateTweetsData(screen_name, tweetsJson):
+    print('Writing {} new tweets to data'.format(len(tweetsJson)))
+
+    if len(tweetsJson) == 0:
+        return
+
+    if not dataFileExists(screen_name):
+        initializeTweetsData(screen_name)
+
     dataFilePath = getDataFilePath(screen_name)
     with open(dataFilePath, 'a') as dataFile:
         while len(tweetsJson) > 0:
@@ -200,6 +211,8 @@ def updateTweetsData(screen_name, tweetsJson):
 
 def loadTweetsData(screen_name):
     tweetsJson = []
+    if not dataFileExists(screen_name):
+        return []
 
     dataFilePath = getDataFilePath(screen_name)
     with open(dataFilePath, 'r') as dataFile:
@@ -213,18 +226,20 @@ def dataFileExists(screen_name):
     dataFilePath = getDataFilePath(screen_name)
     return os.path.exists(dataFilePath)
 
+# Updates tweet data for given user
+# Checks if dataFile exists, gets lastLoggedTweetId,
+# requests tweets since lastLoggedTweetId, udpates dataFile
 def updateUser(screen_name):
-    print('updating user %s'.format(screen_name))
-    if not dataFileExists(screen_name):
-        initializeTweetsData(screen_name)
+    print('Updating user {}'.format(screen_name))
     lastLoggedId = getLastLoggedTweetId(screen_name)
     responseJson = getMoreTweets(screen_name, lastLoggedId)
     updateTweetsData(screen_name, responseJson)
+    print()
     return;
 
 def updateAll():
-    print('updating all!')
-    for user in users:
+    print('-- Updating all! --\n')
+    for screen_name in users:
         updateUser(screen_name)
         time.sleep(delayBetweenUser) #wait 3 minutes
     return;
